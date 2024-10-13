@@ -40,3 +40,28 @@ a {
     color-scheme: dark;
   }
 }
+
+.navLogo {
+  animation: rotate 5s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.navList {
+  display: flex;
+  gap: 50px;
+  cursor: pointer;
+}
+
+.navList > button {
+  color: #0174a3;
+  font-size: 18px;
+  font-weight: 500;
+}

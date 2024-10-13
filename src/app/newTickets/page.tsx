@@ -1,9 +1,9 @@
 import Navbar from "@/components/Navbar";
 import { Box } from "@mui/material";
 
-export default function Login() {
+export default function newTickets() {
     return <Box>
         <Navbar />
-        Login
+        new Tikets
     </Box>
 }
