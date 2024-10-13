@@ -11,13 +11,12 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-// import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import Navbar from '@/components/Navbar';
 import Image from 'next/image';
 import { IconButton, InputAdornment } from '@mui/material';
-
-// import ForgotPassword from './ForgotPassword';
+import ForgotPassword from '@/components/ForgotPassword';
 
 
 const Card = styled(Box)(({ theme }) => ({
@@ -44,15 +43,16 @@ export default function SignInCard() {
     const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
     const [passwordError, setPasswordError] = React.useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-    // const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = React.useState(false);
 
-    // const handleClickOpen = () => {
-    //     setOpen(true);
-    // };
 
-    // const handleClose = () => {
-    //     setOpen(false);
-    // };
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
     const [showPassword, setShowPassword] = React.useState(false);
 
     const handleTogglePasswordVisibility = () => {
@@ -99,12 +99,9 @@ export default function SignInCard() {
     };
 
     return (
-        <Box sx={{ height: '100vh', border: '1px solid red', width: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ height: '100vh', width: '100%', display: 'flex', flexDirection: 'column' }}>
             <Navbar />
             <Card>
-                <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-                    {/* <SitemarkIcon /> */}
-                </Box>
                 <Typography
                     component="h1"
                     variant="h4"
@@ -161,7 +158,7 @@ export default function SignInCard() {
                                             onClick={handleTogglePasswordVisibility}
                                             edge="end"
                                         >
-                                            {/* {showPassword ? <VisibilityOff /> : <Visibility />} */}
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
                                         </IconButton>
                                     </InputAdornment>
                                 ),
@@ -172,7 +169,7 @@ export default function SignInCard() {
                         control={<Checkbox value="remember" color="primary" />}
                         label="Remember me"
                     />
-                    {/* <ForgotPassword open={open} handleClose={handleClose} /> */}
+                    <ForgotPassword open={open} handleClose={handleClose} />
                     <Button type="submit" fullWidth variant="contained" onClick={validateInputs}>
                         Log in
                     </Button>
@@ -182,7 +179,7 @@ export default function SignInCard() {
                             <Link
                                 component="button"
                                 type="button"
-                                // onClick={handleClickOpen}
+                                onClick={handleClickOpen}
                                 variant="body2"
                                 sx={{ alignSelf: 'baseline' }}
                             >
