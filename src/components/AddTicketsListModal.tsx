@@ -8,6 +8,8 @@ import {
     Container,
     Grid,
 } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
+
 
 export default function AddTicketsListModal() {
     const [open, setOpen] = React.useState(true);
@@ -41,11 +43,11 @@ export default function AddTicketsListModal() {
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: 400,
+        width: 800,
         bgcolor: 'background.paper',
-        border: '2px solid #000',
-        boxShadow: 24,
-        p: 4,
+        // border: '1px solid #000',
+        // boxShadow: 4,
+        p: 8,
     };
 
     return (
@@ -58,9 +60,14 @@ export default function AddTicketsListModal() {
                 aria-describedby="modal-modal-description"
             >
                 <Container maxWidth="sm" sx={{ ...style, mt: 4, p: 2, backgroundColor: "#f5f5f5", borderRadius: 2 }}>
-                    <Typography variant="h5" align="center" gutterBottom>
-                        Ticket List Form
-                    </Typography>
+                    <Box onClick={() => setOpen(false)} sx={{ display: 'flex', justifyContent: "space-between", alignItems: "center", cursor: 'pointer' }}>
+                        <Typography variant="h5" align="center" gutterBottom>
+                            Add Ticket List
+                        </Typography>
+                        <CloseIcon />
+                    </Box>
+
+                    <hr style={{ marginBottom: "20px" }} />
                     <Box component="form" onSubmit={handleSubmit}>
                         <Grid container spacing={2}>
                             {/* QA Ticket List */}
