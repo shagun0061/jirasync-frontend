@@ -22,16 +22,9 @@ export default function Navbar() {
                     />
                 </Box>
             </Link>
-            <Box>
-                Date : 12-11-2024
-            </Box>
             <Box className="navList">
-                {/* <Button><Link href="/">Old</Link></Button>
-                <Button><Link href="/newTickets">New</Link></Button>
-                <Button><Link href="/holdTickets">Hold</Link></Button>
-                <Button><Link href="/qaTickets">Qa</Link></Button> */}
                 <Button><CachedIcon /></Button>
-                <Button>Add List</Button>
+                <Button onClick={() => setOpen(false)}>Add List</Button>
                 <Button><Link href="/login">Login</Link></Button>
                 <Button sx={{ bgcolor: isDarkMode ? 'black' : '#f5f7fa', cursor: 'pointer', outline: isDarkMode ? '1px solid white' : '' }} onClick={() => setIsDarkMode(!isDarkMode)}>{isDarkMode ? <WbSunnyRoundedIcon sx={{ color: 'white' }} /> : <ModeNightRoundedIcon sx={{ color: 'black' }} />}</Button>
             </Box>

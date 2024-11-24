@@ -11,7 +11,7 @@ import { statusColor, StyledTableCell, StyledTableRow } from '@/helpers/Common';
 import { Box } from '@mui/material';
 
 
-const CountinueTicket = () => {
+const ContinueTicket = () => {
     function createData(
         ticketNo: string,
         status: string,
@@ -23,12 +23,12 @@ const CountinueTicket = () => {
     }
 
     const rows = [
-        createData('E2D-11456', 'In Progress', "Vaneet Kaur", "www.google.com", "E2D"),
-        createData('LEG2-6746', 'QA', "sumit kumar", "www.google.com", "LEG2",),
-        createData('ELNKWEB-1344', 'Code Review', "Gurbakshish", "www.google.com", "ELNKWEB"),
-        createData('E2D-11456', 'Dev Testing', "kanica", "www.google.com", "E2D"),
-        createData('LEG2-6746', 'QA Testing', "Priyanka", "www.google.com", "LEG2",),
-        createData('ELNKWEB-1344', 'Todo', "Kanak", "www.google.com", "ELNKWEB"),
+        createData('E2D-11456', 'In Progress', "Vaneet Kaur", "E2D", "www.google.com"),
+        createData('LEG2-6746', 'QA', "sumit kumar", "LEG2", "www.google.com"),
+        createData('ELNKWEB-1344', 'Code Review', "Gurbakshish", "ELNKWEB", "www.google.com"),
+        createData('E2D-11456', 'Dev Testing', "kanica", "E2D", "www.google.com"),
+        createData('LEG2-6746', 'QA Testing', "Priyanka", "LEG2", "www.google.com"),
+        createData('ELNKWEB-1344', 'Todo', "Kanak", "ELNKWEB", "www.google.com"),
     ];
 
     return (
@@ -37,15 +37,15 @@ const CountinueTicket = () => {
                 <TableHead>
                     <TableRow>
                         <TableCell align="center" colSpan={12} sx={{ bgcolor: "#D4F6FF", fontFamily: 'Poppins', fontSize: '27px', fontWeight: 900, height: "56px" }}>
-                            Countinue  Ticket
+                            Continue  Ticket
                         </TableCell>
                     </TableRow>
                     <TableRow>
                         <StyledTableCell sx={{ fontWeight: 900 }}>Ticket No</StyledTableCell>
                         <StyledTableCell sx={{ fontWeight: 900 }} align="center">Ticket Staus</StyledTableCell>
                         <StyledTableCell sx={{ fontWeight: 900 }} align="center">Assignee</StyledTableCell>
-                        <StyledTableCell sx={{ fontWeight: 900 }} align="center">Link</StyledTableCell>
                         <StyledTableCell sx={{ fontWeight: 900 }} align="center">Board</StyledTableCell>
+                        <StyledTableCell sx={{ fontWeight: 900 }} align="center">Link</StyledTableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -75,4 +75,4 @@ const CountinueTicket = () => {
     )
 }
 
-export default CountinueTicket
+export default ContinueTicket
