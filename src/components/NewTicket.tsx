@@ -10,7 +10,7 @@ import InsertLinkIcon from '@mui/icons-material/InsertLink';
 import { Box } from '@mui/material';
 import { statusColor, StyledTableCell, StyledTableRow } from '@/helpers/Common';
 
-const NewTicket = () => {
+const NewTicket = ({ filter }) => {
     function createData(
         ticketNo: string,
         status: string,
@@ -22,7 +22,7 @@ const NewTicket = () => {
     }
 
     const rows = [
-        createData('E2D-11456', 'In Progress', "Vaneet Kaur", "E2D", "www.google.com"),
+        createData('E2D-11356', 'In Progress', "Vaneet Kaur", "E2D", "www.google.com"),
         createData('LEG2-6746', 'QA', "sumit kumar", "LEG2", "www.google.com"),
         createData('ELNKWEB-1344', 'Code Review', "Gurbakshish", "ELNKWEB", "www.google.com"),
         createData('E2D-11456', 'Dev Testing', "kanica", "E2D", "www.google.com"),
@@ -31,8 +31,8 @@ const NewTicket = () => {
     ];
 
     return (
-        <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+        <TableContainer component={Paper} sx={{ mt: filter == "All" ? 5 : '' }}>
+            <Table sx={{ minWidth: 650, }} size="small" aria-label="a dense table">
                 <TableHead>
                     <TableRow>
                         <TableCell align="center" colSpan={12} sx={{ bgcolor: "#FCF596", fontFamily: 'Poppins', fontSize: '27px', fontWeight: 900, height: "56px" }}>

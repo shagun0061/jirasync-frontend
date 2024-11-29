@@ -9,12 +9,12 @@ import {
     Grid,
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
+import { MyContext } from '@/context/MyProvider';
 
 
 export default function AddTicketsListModal() {
-    const [open, setOpen] = React.useState(true);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const { isModalOpen, setIsModalOpen } = React.useContext(MyContext);
+    const handleClose = () => setIsModalOpen(false);
     const [formValues, setFormValues] = React.useState({
         qaTicketList: "",
         newTicketList: "",
@@ -52,15 +52,14 @@ export default function AddTicketsListModal() {
 
     return (
         <div>
-            <Button onClick={handleOpen}>Open modal</Button>
             <Modal
-                open={open}
+                open={isModalOpen}
                 onClose={handleClose}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
                 <Container maxWidth="sm" sx={{ ...style, mt: 4, p: 2, backgroundColor: "#f5f5f5", borderRadius: 2 }}>
-                    <Box onClick={() => setOpen(false)} sx={{ display: 'flex', justifyContent: "space-between", alignItems: "center", cursor: 'pointer' }}>
+                    <Box onClick={() => setIsModalOpen(false)} sx={{ display: 'flex', justifyContent: "space-between", alignItems: "center", cursor: 'pointer' }}>
                         <Typography variant="h5" align="center" gutterBottom>
                             Add Ticket List
                         </Typography>
