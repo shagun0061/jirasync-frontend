@@ -59,11 +59,11 @@ export default function AddTicketsListModal() {
                 aria-describedby="modal-modal-description"
             >
                 <Container maxWidth="sm" sx={{ ...style, mt: 4, p: 2, backgroundColor: "#f5f5f5", borderRadius: 2 }}>
-                    <Box onClick={() => setIsModalOpen(false)} sx={{ display: 'flex', justifyContent: "space-between", alignItems: "center", cursor: 'pointer' }}>
+                    <Box sx={{ display: 'flex', justifyContent: "space-between", alignItems: "center", cursor: 'pointer' }}>
                         <Typography variant="h5" align="center" gutterBottom>
                             Add Ticket List
                         </Typography>
-                        <CloseIcon />
+                        <CloseIcon onClick={handleClose} />
                     </Box>
 
                     <hr style={{ marginBottom: "20px" }} />

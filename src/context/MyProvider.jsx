@@ -4,15 +4,10 @@ import { createContext, useState } from "react";
 export const MyContext = createContext();
 
 export const MyProvider = ({ children }) => {
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-
-  // Update state function
-  const updateState = (newState) => {
-    setIsModalOpen(newState);
-  };
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <MyContext.Provider value={{ isModalOpen, updateState }}>
+    <MyContext.Provider value={{ isModalOpen, setIsModalOpen }}>
       {children}
     </MyContext.Provider>
   );

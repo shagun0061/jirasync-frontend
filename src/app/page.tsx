@@ -1,10 +1,9 @@
 "use client";
 import * as React from "react";
-import styles from "./page.module.css";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Navbar from "@/components/Navbar";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import NewTicket from "@/components/NewTicket";
 import QaTickets from "@/components/QaTickets";
 import HoldTicket from "@/components/HoldTicket";
@@ -31,12 +30,10 @@ const theme = createTheme({
     },
   },
 });
-export const MyContext = React.createContext();
 
 export default function Home() {
   const [searchValue, setSearchValue] = React.useState("");
   const [filter, setFilter] = React.useState("All");
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
   const handleChange = (event: SelectChangeEvent) => {
     setFilter(event.target.value as string);
   };
@@ -50,7 +47,7 @@ export default function Home() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <MyContext.Provider value={{ isModalOpen, setIsModalOpen }}>
+      <MyProvider>
         <Box className="page">
           <Navbar />
           <Box sx={{ p: 5 }}>
@@ -156,7 +153,7 @@ export default function Home() {
           </Box>
         </Box>
         <AddTicketsListModal />
-      </MyContext.Provider>
+      </MyProvider>
     </ThemeProvider>
   );
 }
