@@ -3,13 +3,13 @@ import { Schema, model, models } from 'mongoose';
 const ticketSchema = new Schema({
     id: { type: String, unique: true, required: true },
     originalTicketList: {
-        oldTickets: [String], 
+        currentTickets: [String], 
         newTickets: [String], 
         holdTickets: [String], 
         qaTickets: [String], 
       },
     modifiedTicketList: {
-        oldTickets:  [String],
+        currentTickets:  [String],
         newTickets:  [String],
         holdTickets:  [String],
         qaTickets:  [String]}

@@ -1,5 +1,8 @@
 import * as React from 'react';
 import Modal from '@mui/material/Modal';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import LinearProgress from '@mui/material/LinearProgress';
 import {
     Box,
     TextField,
@@ -7,21 +10,39 @@ import {
     Typography,
     Container,
     Grid,
+    CircularProgress,
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
+import { useState, useEffect } from 'react';
 import { MyContext } from '@/context/MyProvider';
+import { buildTicketPayload } from '@/helpers/Common';
 
+
+// Custom Alert Component
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref
+) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 export default function AddTicketsListModal() {
-    const { isModalOpen, setIsModalOpen } = React.useContext(MyContext);
-    const handleClose = () => setIsModalOpen(false);
     const [formValues, setFormValues] = React.useState({
         qaTicketList: "",
         newTicketList: "",
         holdTicketList: "",
         continueTicketList: "",
     });
+    const { isModalOpen, setIsModalOpen } = React.useContext(MyContext);
+    const [toastOpen, setToastOpen] = useState(false);
+    const [toastType, setToastType] = useState<"success" | "error">("success");
+    const [responseMessage, setResponseMessage] = useState("");
+    const [progress, setProgress] = useState(100);
+    const [loading, setLoading] = useState(false);
+    console.log("🚀 ~ AddTicketsListModal ~ loading:", loading)
 
+
+    const autoHideDuration = 3000; // 3 seconds
     // Handle input changes
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -30,14 +51,74 @@ export default function AddTicketsListModal() {
             [name]: value,
         }));
     };
+    // Close Snackbar separately
+    const handleCloseSnackbar = () => {
+        setToastOpen(false);
+        setProgress(100);
+    };
+    const isFormValid = Object.values(formValues).every(value => value.trim() !== "");
+    // Progress Bar Effect
+    useEffect(() => {
+        if (toastOpen) {
+            setProgress(100);
+            const interval = setInterval(() => {
+                setProgress((oldProgress) => Math.max(oldProgress - 10, 0));
+            }, autoHideDuration / 10);
 
-    // Handle form submission
-    const handleSubmit = (e: React.FormEvent) => {
+            setTimeout(() => {
+                setToastOpen(false);
+                clearInterval(interval);
+            }, autoHideDuration);
+
+            return () => clearInterval(interval);
+        }
+    }, [toastOpen]);
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Form Submitted", formValues);
-        // Add further submission logic here
+        setResponseMessage("");
+        try {
+            if (isFormValid) {
+            const ticketListPayload = await buildTicketPayload(formValues)
+            setLoading(true)
+            console.log("🚀 ~ handleSubmit ~ ticketListPayload:", ticketListPayload)
+
+            // Call your POST API endpoint
+            const res = await fetch("/api/ticket", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(ticketListPayload),
+            });
+
+            const data = await res.json();
+            console.log("🚀 ~ handleSubmit ~ data:", data)
+            if (data) {     
+                setResponseMessage("Tickets stored successfully! 🎉");
+                setToastType("success");
+                setToastOpen(true);
+                setIsModalOpen(false)
+            }
+            if (!res.ok) {
+                setResponseMessage("Getting issue Tickets doesn't stored ❌");
+                setToastType("error");
+                setToastOpen(true);
+            }
+
+            }else {
+                setResponseMessage("Please fill all the fields ❌");
+                setToastType("error");
+                setToastOpen(true);
+            }
+        } catch (err: any) {
+            setResponseMessage("Somerthing Went Wrong ❌");
+            setToastType("error");
+            setToastOpen(true);
+
+        } finally {
+            setLoading(false)
+        }
     };
 
+    const handleClose = () => setIsModalOpen(false);
     const style = {
         position: 'absolute',
         top: '50%',
@@ -130,13 +211,31 @@ export default function AddTicketsListModal() {
                                     fullWidth
                                     sx={{ mt: 2 }}
                                 >
-                                    Submit
+                                    {loading ? <CircularProgress size={24} color="inherit" /> : "Submit"}
                                 </Button>
                             </Grid>
                         </Grid>
                     </Box>
                 </Container>
             </Modal>
+
+            {/* Snackbar for Success & Error Messages */}
+            <Snackbar
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                open={toastOpen}
+                autoHideDuration={autoHideDuration}
+                onClose={handleCloseSnackbar}
+            >
+                <Alert onClose={handleCloseSnackbar} severity={toastType} sx={{ width: '100%' }}>
+                    {responseMessage}
+                    {/* Progress Bar Inside Snackbar */}
+                    <LinearProgress
+                        variant="determinate"
+                        value={progress}
+                        sx={{ height: 3, mt: 1 }}
+                    />
+                </Alert>
+            </Snackbar>
         </div>
     );
 }

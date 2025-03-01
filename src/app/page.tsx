@@ -19,6 +19,8 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import CalendarComponent from "@/components/CalendarComponent";
 import SearchTicket from "@/components/SearchTicket";
 import { MyProvider } from "../context/MyProvider.jsx";
+import { useEffect, useState } from "react";
+import { fetchTicketDetailByCategory } from "@/helpers/Common";
 
 const theme = createTheme({
   palette: {
@@ -34,6 +36,16 @@ const theme = createTheme({
 export default function Home() {
   const [searchValue, setSearchValue] = React.useState("");
   const [filter, setFilter] = React.useState("All");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [tickets, setTickets] = useState({
+    continue: [],
+    new: [],
+    qa: [],
+    hold: [],
+  });
+  console.log("🚀 ~ Home ~ tickets:", tickets)
+
   const handleChange = (event: SelectChangeEvent) => {
     setFilter(event.target.value as string);
   };
@@ -44,6 +56,36 @@ export default function Home() {
     color: "#5C5F62",
     fontSize: "14px",
   };
+  
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const data = await fetchTicketDetailByCategory(filter);
+        
+        if(filter) {
+          setTickets({
+            continue: filter === "All" || filter === "Continue" ? data?.tickets?.currentTickets || [] : [],
+            new: filter === "All" || filter === "New" ? data?.tickets?.newTickets || [] : [],
+            qa: filter === "All" || filter === "QA" ? data?.tickets?.qaTickets || [] : [],
+            hold: filter === "All" || filter === "holdTickets" ? data?.tickets?.holdTickets || [] : [],
+          });
+        }
+
+  
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, [filter]); // Run only when filter changes
+  
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -127,26 +169,29 @@ export default function Home() {
                     <MenuItem value="Continue">Continue Tickets</MenuItem>
                     <MenuItem value="New">New Tickets</MenuItem>
                     <MenuItem value="QA">QA Tickets</MenuItem>
-                    <MenuItem value="Hold">Hold Tickets</MenuItem>
+                    <MenuItem value="holdTickets">Hold Tickets</MenuItem>
                   </Select>
                 </FormControl>
               </Stack>
             </Stack>
             {searchValue == "" ? (
-              <Box>
-                {(filter === "Continue" || filter === "All") && (
-                  <ContinueTicket filter={filter} />
-                )}
-                {(filter === "New" || filter === "All") && (
-                  <NewTicket filter={filter} />
-                )}
-                {(filter == "QA" || filter == "All") && (
-                  <QaTickets filter={filter} />
-                )}
-                {(filter === "Hold" || filter === "All") && (
-                  <HoldTicket filter={filter} />
-                )}
-              </Box>
+             <Box>
+             {loading && <p>Loading...</p>}
+             {error && <p style={{ color: "red" }}>Error: {error}</p>}
+       
+             {(filter === "Continue" || filter === "All") && (
+               <ContinueTicket filter={filter} tickets={tickets.continue} />
+             )}
+             {(filter === "New" || filter === "All") && (
+               <NewTicket filter={filter} tickets={tickets.new} />
+             )}
+             {(filter === "QA" || filter === "All") && (
+               <QaTickets filter={filter} tickets={tickets.qa} />
+             )}
+             {(filter === "holdTickets" || filter === "All") && (
+               <HoldTicket filter={filter} tickets={tickets.hold} />
+             )}
+           </Box>
             ) : (
               <SearchTicket searchValue={searchValue} />
             )}

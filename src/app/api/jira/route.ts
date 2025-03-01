@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import axios from 'axios';
-import { connect } from '@/lib/dbConfig';
-import { Ticket } from '@/lib/model/ticketSchema';
+
 
 const JIRA_BASE_URL = process.env.JIRA_BASE_URL;
 const JIRA_EMAIL = process.env.JIRA_EMAIL;
@@ -11,112 +9,105 @@ if (!JIRA_BASE_URL || !JIRA_EMAIL || !JIRA_TOKEN) {
     console.error('Missing required environment variables for Jira configuration.');
 }
 
-// function to query Jira
-async function fetchJiraData(tickets: string[]): Promise<any[]> {
-    if (tickets.length === 0) return [];
+interface JiraTicketResponse {
+    key: string;
+    status: string;
+    assignee: string | null;
+    created: string; 
+}
+/**
+ * Function to check valid board .
+ */
+export async function getValidBoardsFromJira(
+    ticketsToCheck: Record<string, string[]>
+): Promise<Record<string, string>> {
+    
 
     try {
-        const headers = {
-            Authorization: `Basic ${Buffer.from(`${JIRA_EMAIL}:${JIRA_TOKEN}`).toString('base64')}`,
-            'Content-Type': 'application/json',
-        };
+    const resolvedBoards: Record<string, string> = {};
 
-        const jiraEndpoint = `${JIRA_BASE_URL}/rest/api/latest/search?jql=key in (${tickets.join(',')})&expand=changelog`;
-        const response = await axios.get(jiraEndpoint, { headers });
+    for (const [ticket, boardOptions] of Object.entries(ticketsToCheck)) {
+        let selectedBoard: string | null = null;
+        let latestCreatedDate: Date | null = null;
 
-        return response.data.issues.map((issue: any) => {
-            // const changelogEntries = issue.changelog.histories.map((history: any) => ({
-            //     created: history.created,
-            //     items: history.items.map((item: any) => ({
-            //         field: item.field,
-            //         from: item.fromString,
-            //         to: item.toString,
-            //     })),
-            // }));
+        for (const boardTicket of boardOptions) {
+            const jiraResponse = await fetchJiraTicketStatus(boardTicket);
+            console.log("🚀 ~ jiraResponse:", jiraResponse)
 
-            return {
-                key: issue?.key,
-                summary: issue?.fields?.summary,
-                status: {
-                    name: issue?.fields?.status?.name,
-                    issueStatus: issue?.fields?.status?.statusCategory?.name,
-                },
-                priority: issue?.fields?.priority?.name,
-                createdAt: issue?.fields?.created,
-                assignee: issue?.fields?.assignee?.displayName,
-                assigneeImage: issue?.fields?.assignee?.avatarUrls?.['48x48'],
-                reported: issue?.fields?.reporter?.displayName,
-                reportedImage: issue?.fields?.reporter?.avatarUrls?.['48x48'],
-                link: `${JIRA_BASE_URL}/browse/${issue.key}`,
-                // changelog: changelogEntries,
-            };
-        });
-    } catch (error: any) {
-        console.error('Error querying Jira:', error.message);
-        throw new Error('Failed to fetch ticket data from Jira');
+            if (jiraResponse) { // Ensure response is valid
+                const { status, created } = jiraResponse;
+                if (
+                    status === 'In Progress' ||
+                    status === 'Dev Testing' ||
+                    status === 'To Do' ||
+                    status === 'QA TESTING'
+                  ) {
+
+                    const ticketCreatedDate = new Date(created);
+
+                    // If no selected board OR ticket has a more recent created date, update selection
+                    if (!latestCreatedDate || ticketCreatedDate > latestCreatedDate) {
+                        selectedBoard = boardTicket;
+                        console.log("🚀 ~ selectedBoard:", selectedBoard)
+                        latestCreatedDate = ticketCreatedDate;
+                    }
+                }
+            }
+        }
+        // Assign the most recently created valid board ticket (if found)
+        resolvedBoards[ticket] = selectedBoard ?? (boardOptions.find(b => b !== selectedBoard) ?? boardOptions[0]);
     }
+    console.log('resolvedBoards-----------', resolvedBoards);
+    return resolvedBoards;
+
+} catch (error) {
+    console.error("Error in getValidBoardsFromJira:", error);
+    throw error; // Rethrow the error so the caller can handle it.
+
+  }
 }
 
-// API handler
-export async function GET(req: NextRequest) {
+
+/**
+ * Function is used to validate board,fetching ticket status from Jira .
+ * 
+ */
+async function fetchJiraTicketStatus(ticketNumber: string): Promise<JiraTicketResponse | null> {
+    
+    const JIRA_API_URL = `${JIRA_BASE_URL}/rest/api/3/issue/${ticketNumber}`;
     try {
-        // Extract ticket type (e.g., oldTickets, newTickets) from query params
-        const { searchParams } = new URL(req.url);
-        const ticketType = searchParams.get('type');
-
-        // Connect to the database
-        await connect();
-
-        // Fetch the latest ticket document
-        const ticketData = await Ticket.findOne().sort({ createdAt: -1 });
-
-        if (!ticketData) {
-            return NextResponse.json({ error: 'No ticket data found' }, { status: 404 });
-        }
-
-        let tickets;
-
-        if (ticketType) {
-            
-            // Fetch tickets of a specific type
-            tickets = ticketData.modifiedTicketList?.[ticketType];
-            if (!tickets || tickets.length === 0) {
-
-                return NextResponse.json({ error: `No tickets found for type: ${ticketType}` }, { status: 404 });
+        const response = await fetch(JIRA_API_URL, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Basic ${Buffer.from(`${JIRA_EMAIL +":" + JIRA_TOKEN}`).toString('base64')}`,
+                'Accept': 'application/json'
             }
+        });
 
-        } else {
-            // Return all ticket types (combine all arrays into a single object)
-            tickets = {
-                newTickets: ticketData.modifiedTicketList?.newTickets || [],
-                oldTickets: ticketData.modifiedTicketList?.oldTickets || [],
-                holdTickets: ticketData.modifiedTicketList?.holdTickets || [],
-                qaTickets: ticketData.modifiedTicketList?.qaTickets || [],
-            };
-        }
+        if (!response.ok) return null;
 
-        // Prepare tickets for Jira fetching (single array for ticketType or multiple keys for all)
-        const ticketsToFetch = Array.isArray(tickets)
-            ? tickets
-            : Object.values(tickets).flat();
+        const data = await response.json();
 
-            
+   // Convert the created date into a more readable format (YYYY-MM-DD HH:mm)
+        const createdDate = new Date(data?.fields?.created ?? '').toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true, 
+        });
 
-        const jiraData = await fetchJiraData(ticketsToFetch);
+        return { 
+            key: data?.key || '',  
+            status: data?.fields?.status?.name || 'Unknown',  
+            assignee: data?.fields?.assignee?.displayName || null,
+            created: createdDate 
+        };
 
-        // Construct response based on requested data
-        const response = ticketType
-            ? { [ticketType]: jiraData }
-            : {
-                newTickets: jiraData.filter((t) => tickets.newTickets.includes(t.key)),
-                oldTickets: jiraData.filter((t) => tickets.oldTickets.includes(t.key)),
-                holdTickets: jiraData.filter((t) => tickets.holdTickets.includes(t.key)),
-                qaTickets: jiraData.filter((t) => tickets.qaTickets.includes(t.key)),
-            };
-
-        return NextResponse.json({ data: response }, { status: 200 });
-    } catch (error: any) {
-        console.error('Error in Jira API GET:', error.message);
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+        
+    } catch (error) {
+        console.error(`Error fetching Jira ticket for confirming the board  ${ticketNumber}:`, error);
+        return null;
     }
 }

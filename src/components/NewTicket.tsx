@@ -8,31 +8,16 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import InsertLinkIcon from '@mui/icons-material/InsertLink';
 import { Box } from '@mui/material';
-import { statusColor, StyledTableCell, StyledTableRow } from '@/helpers/Common';
+import { mapTicketsToRows, statusColor, StyledTableCell, StyledTableRow } from '@/helpers/Common';
+import { FilterProp, } from '@/helpers'
 
-const NewTicket = ({ filter }) => {
-    function createData(
-        ticketNo: string,
-        status: string,
-        Assignee: string,
-        board: string,
-        Link: string,
-    ) {
-        return { ticketNo, status, Assignee, board, Link };
-    }
+const NewTicket: React.FC<FilterProp> = ({ filter, tickets }) => {
 
-    const rows = [
-        createData('E2D-11356', 'In Progress', "Vaneet Kaur", "E2D", "www.google.com"),
-        createData('LEG2-6746', 'QA', "sumit kumar", "LEG2", "www.google.com"),
-        createData('ELNKWEB-1344', 'Code Review', "Gurbakshish", "ELNKWEB", "www.google.com"),
-        createData('E2D-11456', 'Dev Testing', "kanica", "E2D", "www.google.com"),
-        createData('LEG2-6746', 'QA Testing', "Priyanka", "LEG2", "www.google.com"),
-        createData('ELNKWEB-1344', 'Todo', "Kanak", "ELNKWEB", "www.google.com"),
-    ];
+    const rows = mapTicketsToRows(tickets);
 
     return (
-        <TableContainer component={Paper} sx={{ mt: filter == "All" ? 5 : '' }}>
-            <Table sx={{ minWidth: 650, }} size="small" aria-label="a dense table">
+        <TableContainer component={Paper} sx={{ mt: filter === "All" ? 5 : '' }}>
+            <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
                 <TableHead>
                     <TableRow>
                         <TableCell align="center" colSpan={12} sx={{ bgcolor: "#FCF596", fontFamily: 'Poppins', fontSize: '27px', fontWeight: 900, height: "56px" }}>
@@ -41,14 +26,16 @@ const NewTicket = ({ filter }) => {
                     </TableRow>
                     <TableRow>
                         <StyledTableCell sx={{ fontWeight: 900 }}>Ticket No</StyledTableCell>
-                        <StyledTableCell sx={{ fontWeight: 900 }} align="center">Ticket Staus</StyledTableCell>
+                        <StyledTableCell sx={{ fontWeight: 900 }} align="center">Ticket Status</StyledTableCell>
                         <StyledTableCell sx={{ fontWeight: 900 }} align="center">Assignee</StyledTableCell>
-                        <StyledTableCell sx={{ fontWeight: 900 }} align="center">Board</StyledTableCell>
+                        <StyledTableCell sx={{ fontWeight: 900 }} align="center">Reported By</StyledTableCell>
+
+                        <StyledTableCell sx={{ fontWeight: 900 }} align="center">Priority</StyledTableCell>
                         <StyledTableCell sx={{ fontWeight: 900 }} align="center">Link</StyledTableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {rows.map((row) => (
+                    {rows?.map((row) => (
                         <StyledTableRow key={row.ticketNo}>
                             <TableCell component="th" scope="row">
                                 {row.ticketNo}
@@ -59,19 +46,43 @@ const NewTicket = ({ filter }) => {
                                         borderRadius: "20px", padding: 1,
                                         ...statusColor(row.status),
                                         fontWeight: "bold"
-                                    }} >
+                                    }}>
                                     {row.status}
                                 </Box>
                             </TableCell>
-                            <TableCell align="center">{row.Assignee}</TableCell>
-                            <TableCell align="center">{row.board}</TableCell>
-                            <TableCell align="center"><InsertLinkIcon /></TableCell>
+                            <TableCell align="center">
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <img
+                                        src={row.assigneeImage}
+                                        alt={row?.assignee}
+                                        style={{ width: 30, height: 30, borderRadius: '50%', marginRight: 8 }}
+                                    />
+                                    {row.assignee}
+                                </Box>
+                            </TableCell>
+                            <TableCell align="center">
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <img
+                                        src={row.reportedByImage}
+                                        alt={row?.reportedBy}
+                                        style={{ width: 30, height: 30, borderRadius: '50%', marginRight: 8 }}
+                                    />
+                                    {row.reportedBy}
+                                </Box>
+                            </TableCell>
+                            <TableCell align="center"> {row?.priority}</TableCell>
+                            <TableCell align="center">
+                                <a href={row?.Link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <InsertLinkIcon />
+                                </a>
+                            </TableCell>
+
                         </StyledTableRow>
                     ))}
                 </TableBody>
             </Table>
         </TableContainer>
-    )
-}
+    );
+};
 
-export default NewTicket
+export default NewTicket;
