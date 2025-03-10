@@ -2,7 +2,7 @@
 import { styled } from '@mui/material/styles';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
-import { RowData } from '.';
+import { RowData, Ticket } from '.';
 
 export const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:nth-of-type(odd)': {
@@ -36,9 +36,9 @@ export function statusColor(status: string): { backgroundColor: string; color: s
 
   // Default: White background with black text for undefined statuses
   return statusColors[status] || { backgroundColor: "#FFFFFF", color: "#000000" };
-}
+} 
 
-export const mapTicketsToRows = (tickets: any[]): RowData[] => {
+export const mapTicketsToRows = (tickets: Ticket[]): RowData[] => {
   return tickets?.map((ticket) => ({
       ticketNo: ticket?.key,
       status: ticket?.status?.name,

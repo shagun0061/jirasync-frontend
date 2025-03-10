@@ -40,7 +40,7 @@ export interface Ticket {
     priority: string;
     Link: string;
   }
-  
+
   // Component props type
   export interface FilterProp {
     filter: string;

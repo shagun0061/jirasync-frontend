@@ -9,13 +9,19 @@ import {
 } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import CachedIcon from "@mui/icons-material/Cached";
 import { MyContext } from "@/context/MyProvider";
 
 export default function Navbar() {
     const { setIsModalOpen } = useContext(MyContext);
-    const isUserLogin = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+
+    const [isUserLogin,setIsUserLogin] = useState<boolean>(false)
+
+    useEffect(() => {
+        setIsUserLogin(localStorage.getItem("authToken") ? true : false);
+    }, []);
+
 
     return (
         <Stack

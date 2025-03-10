@@ -9,7 +9,7 @@ import Paper from '@mui/material/Paper';
 import InsertLinkIcon from '@mui/icons-material/InsertLink';
 import { mapTicketsToRows, statusColor, StyledTableCell, StyledTableRow } from '@/helpers/Common';
 import { Box } from '@mui/material';
-import { FilterProp, RowData } from '@/helpers';
+import { FilterProp } from '@/helpers';
 
 
 const ContinueTicket: React.FC<FilterProp> = ({ filter, tickets }) => {

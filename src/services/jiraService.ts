@@ -2,7 +2,6 @@ import { connect } from "@/lib/dbConfig";
 import axios from "axios";
 import { JiraTicketsDetail } from "@/lib/model/jiraTicketDetailSchema";
 import { ProcessedTickets } from "@/app/api/ticket/route";
-import mongoose from "mongoose";
 // import JiraTicketsDetail
 
 const JIRA_BASE_URL = process.env.JIRA_BASE_URL;
@@ -53,8 +52,8 @@ export async function getTicketDetailsFromJira(tickets: string[]): Promise<any[]
                 // changelog: changelogEntries,
             };
         });
-    } catch (error: any) {
-        console.error('Error querying Jira:', error.message);
+    } catch (error: unknown) {
+        console.error('Error querying Jira:', error);
         throw new Error('Failed to fetch ticket data from Jira');
     }
 }
@@ -79,7 +78,7 @@ export async function fetchAndStoreJiraDetails(modifiedTicketList: ProcessedTick
 
         if (categorizedTickets) {
             await saveTicketsToDB(categorizedTickets, modifiedTicketList);
-            return  categorizedTickets
+            return categorizedTickets
         }
 
 
@@ -96,13 +95,13 @@ export async function saveTicketsToDB(
     try {
         await connect();
 
-        const updateData = {
-            modifiedTicketList,
-            jiraTicketDetail: categorizedTickets,
-            fetchedAt: new Date(),
-            updatedAt: new Date(),
-            deletedAt: null
-        };
+        // const updateData = {
+        //     modifiedTicketList,
+        //     jiraTicketDetail: categorizedTickets,
+        //     fetchedAt: new Date(),
+        //     updatedAt: new Date(),
+        //     deletedAt: null
+        // };
 
 
         const JiraDetail = new JiraTicketsDetail({

@@ -1,9 +1,7 @@
-import React, { useState } from "react";
-import { Box, TextField } from "@mui/material";
+import React from "react";
+import { Box, } from "@mui/material";
 
 const CalendarComponent = () => {
-    const [month, setMonth] = useState("MAY");
-    const [date, setDate] = useState(12);
 
     return (
         <Box

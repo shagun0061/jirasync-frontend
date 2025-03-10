@@ -10,7 +10,7 @@ import InsertLinkIcon from '@mui/icons-material/InsertLink';
 import { Box } from '@mui/material';
 
 import { mapTicketsToRows, statusColor, StyledTableCell, StyledTableRow } from '@/helpers/Common';
-import { FilterProp, RowData, } from '@/helpers';
+import { FilterProp } from '@/helpers';
 
 
 const HoldTicket: React.FC<FilterProp> = ({ filter, tickets }) => {
