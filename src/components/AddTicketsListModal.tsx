@@ -16,6 +16,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useState, useEffect } from 'react';
 import { MyContext } from '@/context/MyProvider';
 import { buildTicketPayload } from '@/helpers/Common';
+import { TicketListRefreshProps } from '@/helpers';
+
+
 
 
 // Custom Alert Component
@@ -26,7 +29,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-export default function AddTicketsListModal() {
+export default function AddTicketsListModal({setRefresh} :TicketListRefreshProps) {
     const [formValues, setFormValues] = React.useState({
         qaTicketList: "",
         newTicketList: "",
@@ -39,7 +42,6 @@ export default function AddTicketsListModal() {
     const [responseMessage, setResponseMessage] = useState("");
     const [progress, setProgress] = useState(100);
     const [loading, setLoading] = useState(false);
-    console.log("🚀 ~ AddTicketsListModal ~ loading:", loading)
 
 
     const autoHideDuration = 3000; // 3 seconds
@@ -76,47 +78,52 @@ export default function AddTicketsListModal() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setResponseMessage("");
+        
         try {
             if (isFormValid) {
-            const ticketListPayload = await buildTicketPayload(formValues)
-            setLoading(true)
-            console.log("🚀 ~ handleSubmit ~ ticketListPayload:", ticketListPayload)
-
-            // Call your POST API endpoint
-            const res = await fetch("/api/ticket", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(ticketListPayload),
-            });
-
-            const data = await res.json();
-            console.log("🚀 ~ handleSubmit ~ data:", data)
-            if (data) {     
-                setResponseMessage("Tickets stored successfully! 🎉");
-                setToastType("success");
-                setToastOpen(true);
-                setIsModalOpen(false)
-            }
-            if (!res.ok) {
-                setResponseMessage("Getting issue Tickets doesn't stored ❌");
-                setToastType("error");
-                setToastOpen(true);
-            }
-
-            }else {
+                const ticketListPayload = await buildTicketPayload(formValues);
+                setLoading(true);
+    
+                // Call your POST API endpoint
+                const res = await fetch("/api/ticket", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(ticketListPayload),
+                });
+    
+                if (res.ok) {     
+                    setResponseMessage("Tickets stored successfully! 🎉");
+                    setToastType("success");
+                    setToastOpen(true);
+                    setIsModalOpen(false);
+                } else {
+                    setResponseMessage("Getting issue, tickets didn't store ❌");
+                    setToastType("error");
+                    setToastOpen(true);
+                }
+    
+            } else {
                 setResponseMessage("Please fill all the fields ❌");
                 setToastType("error");
                 setToastOpen(true);
             }
-        } catch (err: any) {
-            setResponseMessage("Somerthing Went Wrong ❌");
+        } catch (err: unknown) {
+            console.error("Error in handleSubmit:", err);
+    
+            if (err instanceof Error) {
+                setResponseMessage(`Something Went Wrong ❌: ${err.message}`);
+            } else {
+                setResponseMessage("Something Went Wrong ❌");
+            }
+            
             setToastType("error");
             setToastOpen(true);
-
         } finally {
-            setLoading(false)
+            setLoading(false);
+            setRefresh((prev) => !prev)
         }
     };
+    
 
     const handleClose = () => setIsModalOpen(false);
     const style = {
@@ -189,11 +196,11 @@ export default function AddTicketsListModal() {
                                 />
                             </Grid>
 
-                            {/* Continue Ticket List */}
+                            {/* Current Ticket List */}
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
-                                    label="Continue Ticket List"
+                                    label="Current Ticket List"
                                     name="continueTicketList"
                                     value={formValues.continueTicketList}
                                     onChange={handleChange}

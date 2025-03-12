@@ -1,9 +1,15 @@
-import React, { useState } from "react";
-import { Box, TextField } from "@mui/material";
+import React from "react";
+import { Box } from "@mui/material";
 
 const CalendarComponent = () => {
-    const [month, setMonth] = useState("MAY");
-    const [date, setDate] = useState(12);
+    // Get current date
+    const today = new Date();
+    
+    // Get month in short format (e.g., "Mar")
+    const month = today.toLocaleString('default', { month: 'short' }).toUpperCase();
+
+    // Get date
+    const date = today.getDate();
 
     return (
         <Box
@@ -22,12 +28,13 @@ const CalendarComponent = () => {
                 overflow: "hidden",
             }}
         >
+            {/* Top two dots */}
             <Box
                 sx={{
-                    width: "2px", // Adjust this to set the desired dot size
-                    height: "2px", // Ensure height equals width for a perfect circle
+                    width: "2px",
+                    height: "2px",
                     bgcolor: "white",
-                    borderRadius: "50%", // Ensures the shape is a circle
+                    borderRadius: "50%",
                     position: "absolute",
                     top: "2px",
                     right: "30%",
@@ -35,7 +42,7 @@ const CalendarComponent = () => {
             />
             <Box
                 sx={{
-                    width: "2px", // Match the size of the other dot
+                    width: "2px",
                     height: "2px",
                     bgcolor: "white",
                     borderRadius: "50%",
@@ -52,10 +59,10 @@ const CalendarComponent = () => {
                     color: "white",
                     textAlign: "center",
                     padding: "5px 0",
-                    fontWeight: 900
+                    fontWeight: 900,
                 }}
             >
-                MAR
+                {month}
             </Box>
             <Box sx={{ borderBottom: '2px solid white', width: '100%', mt: '-6px' }}></Box>
 
@@ -67,10 +74,10 @@ const CalendarComponent = () => {
                     alignItems: "center",
                     justifyContent: "center",
                     color: "white",
-                    fontWeight: 900
+                    fontWeight: 900,
                 }}
             >
-                21
+                {date}
             </Box>
         </Box>
     );

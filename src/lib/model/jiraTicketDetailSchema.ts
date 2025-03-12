@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 import { Schema, model, models } from 'mongoose';
 
 const jiraTicketSchema = new Schema({
