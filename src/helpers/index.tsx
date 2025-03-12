@@ -4,18 +4,27 @@ interface TicketStatus {
   }
   
 export interface Ticket {
-    status: TicketStatus;
-    key: string;
-    summary: string;
-    priority: string;
-    reported: string;
-    reportedImage?: string;
-    assignee?: string;
-    assigneeImage?: string;
-    link: string;
-    createdAt: string;
-    _id: string;
+  category?: string;
+  status: TicketStatus;
+  key: string;
+  summary: string;
+  priority: string;
+  reported: string;
+  reportedBy?: string;
+  reportedImage?: string;
+  assignee?: string;
+  assigneeImage?: string;
+  link: string;
+  createdAt: string;
+  _id: string;
+}
+
+  export interface TicketEditableRowProps {
+    row: any; 
+    category: string;
+    onRowUpdate?: (updatedRow: any) => void;
   }
+  
   
   // Type for the tickets grouped by categories from API
   export interface TicketsResponse {
@@ -30,6 +39,20 @@ export interface Ticket {
     message: string;
     tickets: TicketsResponse;
   }
+  export interface TicketsByCategory {
+    continue?: Ticket[];
+    new?: Ticket[];
+    qa?: Ticket[];
+    hold?: Ticket[];
+  }
+  
+
+  export interface SearchTicketProps {
+    searchValue: string;
+    tickets?: TicketsByCategory;
+    combinedTickets: Ticket[];
+  }
+  
   export interface RowData {
     ticketNo: string;
     status: string;
@@ -42,8 +65,14 @@ export interface Ticket {
   }
 
   // Component props type
-  export interface FilterProp {
+  export interface TicketListingDetailProp {
+    title: string,
     filter: string;
-    tickets: Ticket[]
+    tickets?: Ticket[]
     loading?: boolean;
+    error?: string;
   }
+
+  export interface TicketListRefreshProps {
+    setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+}

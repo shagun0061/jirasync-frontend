@@ -79,7 +79,6 @@ async function createTicketCombination(ticketList: TicketList): Promise<{ finalT
 
       // Loop through every category in the original ticketList
       for (const category in ticketList) {
-        console.log("🚀 ~ createTicketCombination ~ ticketList:", ticketList);
 
         // Compare as strings (remove parseInt) so "2150" matches "2150"
         if (ticketList[category as keyof TicketList].includes(ticket)) {
@@ -101,7 +100,7 @@ async function createTicketCombination(ticketList: TicketList): Promise<{ finalT
 }
 
 // using this api for board generate and stroing that jira detail info in db 
-export async function POST(req: NextRequest,) {
+export async function POST(req: NextRequest) {
   try {
 
     const payload = await req.json();
@@ -125,24 +124,63 @@ export async function POST(req: NextRequest,) {
     await newTicket.save();
 
 
-    // function to fetch Jira details & store in DB**
-    // await fetchAndStoreJiraDetails(finalTicketList);
-    return NextResponse.json({ message: 'Tickets List stored successfully', ticketId, data: newTicket }, { status: 201 });
+    return NextResponse.json(
+      {
+        message: 'Tickets List stored successfully',
+        ticketId,
+        data: newTicket,
+      },
+      { status: 201 }
+    );
 
-  } catch (error: any) {
-    console.error('Error getting to store ticket list in db:', error.message);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  } catch (error: unknown) {
+   
+
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { message: 'An error occurred', error: error.message,  },
+        { status: 500 }
+      );
+    }
+    return NextResponse.json({ message: 'An unknown error occurred' }, { status: 500 });
   }
 }
 
 
+// memory cache object
+const cache: { data: any; timestamp: number } = {
+  data: null,
+  timestamp: 0,
+};
 
-// fetch or get jira ticket detail with category 
+// Cache expiration time in milliseconds (e.g., 5 minutes)
+const CACHE_EXPIRATION_TIME = 5 * 60 * 1000;
+
 export async function GET(req: NextRequest) {
   try {
     // Parse query parameters (e.g., ?category=newTickets)
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category");
+
+    const now = Date.now();
+
+    // Check if cached data is available and valid
+    if (cache.data && now - cache.timestamp < CACHE_EXPIRATION_TIME) {
+      const jiraRecord = cache.data;
+
+      if (category) {
+        const tickets = jiraRecord.jiraTicketDetail || [];
+        return NextResponse.json({
+          message: `Fetched ${category} successfully (cached)`,
+          tickets,
+        });
+      } else {
+        return NextResponse.json({
+          message: "Fetched all categories successfully (cached)",
+          tickets: jiraRecord.jiraTicketDetail,
+        });
+      }
+    }
 
     // Connect to MongoDB
     await connect();
@@ -162,12 +200,12 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Step 2: Refresh Jira details by calling fetchAndStoreJiraDetails
-    // This function should fetch fresh Jira details based on the modifiedTicketList
+    // Step 2: Refresh Jira details
     await fetchAndStoreJiraDetails(latestTicketRecord.modifiedTicketList);
 
-    // Step 3: Retrieve the updated Jira details from the JiraTicketsDetail collection
+    // Step 3: Retrieve updated Jira details
     const jiraRecord = await JiraTicketsDetail.findOne({}).sort({ updatedAt: -1 });
+
     if (!jiraRecord) {
       return NextResponse.json(
         { message: "No Jira ticket details found" },
@@ -175,17 +213,18 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Step 4: Prepare the response based on the category query parameter
+    // Step 4: Update cache
+    cache.data = jiraRecord;
+    cache.timestamp = now;
 
+    // Step 5: Return response
     if (category) {
-      // If a specific category is requested, return that category's Jira details
       const tickets = jiraRecord.jiraTicketDetail || [];
       return NextResponse.json({
         message: `Fetched ${category} successfully`,
         tickets,
       });
     } else {
-      // Otherwise, return the entire jiraTicketDetail object containing all categories
       return NextResponse.json({
         message: "Fetched all categories successfully",
         tickets: jiraRecord.jiraTicketDetail,
@@ -199,4 +238,3 @@ export async function GET(req: NextRequest) {
     );
   }
 }
-

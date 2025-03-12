@@ -3,15 +3,12 @@ import * as React from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Navbar from "@/components/Navbar";
-import { Box, Stack } from "@mui/material";
-import NewTicket from "@/components/NewTicket";
-import QaTickets from "@/components/QaTickets";
-import HoldTicket from "@/components/HoldTicket";
-import ContinueTicket from "@/components/ContinueTicket";
+import { Box, IconButton, Stack } from "@mui/material";
 import AddTicketsListModal from "@/components/AddTicketsListModal";
 import InputAdornment from "@mui/material/InputAdornment";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from '@mui/icons-material/Close';
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -21,6 +18,8 @@ import SearchTicket from "@/components/SearchTicket";
 import { MyProvider } from "../context/MyProvider.jsx";
 import { useEffect, useState } from "react";
 import { fetchTicketDetailByCategory } from "@/helpers/Common";
+import TicketTable from "@/components/TicketDetailsTable";
+import { Ticket, TicketsByCategory } from "@/helpers/index.jsx";
 
 const theme = createTheme({
   palette: {
@@ -34,11 +33,13 @@ const theme = createTheme({
 });
 
 export default function Home() {
-  const [searchValue, setSearchValue] = React.useState("");
-  const [filter, setFilter] = React.useState("All");
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [filter, setFilter] = useState<string>("All");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [tickets, setTickets] = useState({
+  const [refresh, setRefresh] = useState<boolean>(false);
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+  const [tickets, setTickets] = useState<TicketsByCategory>({
     continue: [],
     new: [],
     qa: [],
@@ -46,9 +47,26 @@ export default function Home() {
   });
   console.log("🚀 ~ Home ~ tickets:", tickets)
 
+
   const handleChange = (event: SelectChangeEvent) => {
     setFilter(event.target.value as string);
   };
+
+  const handleSearchIconClick = () => {
+    setIsSearchOpen(true);
+
+  };
+  const handleSearchInputBlur = () => {
+    if (searchValue === '') {
+      setIsSearchOpen(false);
+    }
+  };
+
+  const handleClear = () => {
+    setSearchValue('');
+    setIsSearchOpen(false);
+  };
+
   const inputStyles = {
     height: "44px",
     borderRadius: "8px",
@@ -56,42 +74,51 @@ export default function Home() {
     color: "#5C5F62",
     fontSize: "14px",
   };
-  
-  
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
-        setError(null);
-        
-        const data = await fetchTicketDetailByCategory(filter);
-        
-        if(filter) {
+        if (filter || refresh) {
+          setLoading(true);
+          setError(null);
+          const data = await fetchTicketDetailByCategory(filter);
+
           setTickets({
-            continue: filter === "All" || filter === "Continue" ? data?.tickets?.currentTickets || [] : [],
+            continue: filter === "All" || filter === "Current" ? data?.tickets?.currentTickets || [] : [],
             new: filter === "All" || filter === "New" ? data?.tickets?.newTickets || [] : [],
             qa: filter === "All" || filter === "QA" ? data?.tickets?.qaTickets || [] : [],
-            hold: filter === "All" || filter === "holdTickets" ? data?.tickets?.holdTickets || [] : [],
+            hold: filter === "All" || filter === "Hold" ? data?.tickets?.holdTickets || [] : [],
           });
         }
-
-  
       } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-  
+
     fetchData();
-  }, [filter]); // Run only when filter changes
-  
+  }, [filter, refresh]);
+
+  const combineTickets = (tickets:TicketsByCategory):Ticket[] => {
+    return [
+      ...(tickets.continue ?? []).map(ticket => ({ ...ticket, category: 'Continue' })),
+      ...(tickets.new ?? []).map(ticket => ({ ...ticket, category: 'New' })),
+      ...(tickets.qa ?? []).map(ticket => ({ ...ticket, category: 'QA' })),
+      ...(tickets.hold ?? []).map(ticket => ({ ...ticket, category: 'Hold' })),
+    ];
+  };
+
+  // Call the function
+  const combinedTickets = combineTickets(tickets);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <MyProvider>
         <Box className="page">
-          <Navbar />
+          <Navbar setRefresh={setRefresh} />
           <Box sx={{ p: 5 }}>
             {/* Header Section */}
             <Stack
@@ -129,20 +156,44 @@ export default function Home() {
                 }}
               >
                 {/* Search Input */}
-                <FormControl sx={{ flex: 1, maxWidth: "60%" }}>
+                <FormControl
+                  sx={{
+                    width: isSearchOpen ? "200px" : "40px",
+                    transition: "width 0.3s ease",
+                    height: "32px",
+                    justifyContent: "center"
+                  }}
+                >
                   <OutlinedInput
                     size="small"
                     id="header-search"
-                    sx={{ ...inputStyles, px: 2 }}
+                    value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
+                    onBlur={handleSearchInputBlur}
+                    onFocus={() => setIsSearchOpen(true)}
                     startAdornment={
-                      <InputAdornment position="start" sx={{ color: "#3FA0EF" }}>
+                      <InputAdornment position="start" sx={{ color: "#3FA0EF", pl: '5px', cursor: 'pointer' }} onClick={handleSearchIconClick}>
                         <SearchIcon />
                       </InputAdornment>
                     }
-                    placeholder="Search Ticket"
+                    endAdornment={
+                      searchValue && (
+                        <InputAdornment position="end">
+                          <IconButton onClick={handleClear} edge="end" size="small">
+                            <CloseIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }
+                    placeholder={isSearchOpen ? "Search Ticket" : ""}
+                    sx={{
+                      ...inputStyles,
+                      paddingLeft: isSearchOpen ? "0px" : "0px",
+                    }}
                   />
                 </FormControl>
+
+
 
                 {/* Ticket Filter Dropdown */}
                 <FormControl sx={{ minWidth: 200 }}>
@@ -166,38 +217,61 @@ export default function Home() {
                     MenuProps={{ disableScrollLock: true }}
                   >
                     <MenuItem value="All">All Tickets</MenuItem>
-                    <MenuItem value="Continue">Continue Tickets</MenuItem>
+                    <MenuItem value="Current">Current Tickets</MenuItem>
                     <MenuItem value="New">New Tickets</MenuItem>
                     <MenuItem value="QA">QA Tickets</MenuItem>
-                    <MenuItem value="holdTickets">Hold Tickets</MenuItem>
+                    <MenuItem value="Hold">Hold Tickets</MenuItem>
                   </Select>
                 </FormControl>
               </Stack>
             </Stack>
-            {searchValue == "" ? (
-             <Box>
-             {loading && <p>Loading...</p>}
-             {error && <p style={{ color: "red" }}>Error: {error}</p>}
-       
-             {(filter === "Continue" || filter === "All") && (
-               <ContinueTicket filter={filter} tickets={tickets.continue} />
-             )}
-             {(filter === "New" || filter === "All") && (
-               <NewTicket filter={filter} tickets={tickets.new} />
-             )}
-             {(filter === "QA" || filter === "All") && (
-               <QaTickets filter={filter} tickets={tickets.qa} />
-             )}
-             {(filter === "holdTickets" || filter === "All") && (
-               <HoldTicket filter={filter} tickets={tickets.hold} />
-             )}
-           </Box>
+
+            {searchValue === "" ? (
+              <Box>
+                {(filter === "Current" || filter === "All") && (
+                <TicketTable
+                title="Current Ticket"
+                tickets={tickets.continue} // ✅ always Ticket[]
+                filter={filter}
+                loading={loading}
+              />
+                )}
+                {(filter === "New" || filter === "All") && (
+                  <TicketTable
+                    title="New Ticket"
+                    
+                    tickets={tickets.new}
+                    filter={filter}
+                    loading={loading}
+                  />
+                )}
+                {(filter === "QA" || filter === "All") && (
+                  <TicketTable
+                    title="QA Ticket"
+                    
+                    tickets={tickets?.qa}
+                    filter={filter}
+                    loading={loading}
+                  />
+                )}
+                {(filter === "Hold" || filter === "All") && (
+                  <TicketTable
+                    title="Hold Ticket" 
+                    
+                    tickets={tickets?.hold}
+                    filter={filter}
+                    loading={loading}
+                  />
+                )}
+              </Box>
             ) : (
-              <SearchTicket searchValue={searchValue} />
+              <SearchTicket searchValue={searchValue} combinedTickets={combinedTickets} />
             )}
           </Box>
         </Box>
-        <AddTicketsListModal />
+        <AddTicketsListModal
+          setRefresh={setRefresh}
+        />
       </MyProvider>
     </ThemeProvider>
   );

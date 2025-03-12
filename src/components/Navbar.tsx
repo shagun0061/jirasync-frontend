@@ -12,11 +12,16 @@ import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import CachedIcon from "@mui/icons-material/Cached";
 import { MyContext } from "@/context/MyProvider";
+import { TicketListRefreshProps } from "@/helpers";
 
-export default function Navbar() {
+type Props = {
+    setRefresh: (value: boolean) => void;
+};
+
+export default function Navbar({ setRefresh }: TicketListRefreshProps) {
     const { setIsModalOpen } = useContext(MyContext);
 
-    const [isUserLogin,setIsUserLogin] = useState<boolean>(false)
+    const [isUserLogin, setIsUserLogin] = useState<boolean>(false)
 
     useEffect(() => {
         setIsUserLogin(localStorage.getItem("authToken") ? true : false);
@@ -47,7 +52,9 @@ export default function Navbar() {
                 </Box>
             </Link>
             <Box className="navList">
-                <Button>
+                <Button onClick={() => {
+                    setRefresh((prev) => !prev)
+                }}>
                     <CachedIcon />
                 </Button>
                 <Button onClick={() => setIsModalOpen(true)}>Add List</Button>

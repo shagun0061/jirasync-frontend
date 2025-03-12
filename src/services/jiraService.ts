@@ -13,49 +13,41 @@ if (!JIRA_BASE_URL || !JIRA_EMAIL || !JIRA_TOKEN) {
 }
 
 //fetch ticket full detail from jira 
-export async function getTicketDetailsFromJira(tickets: string[]): Promise<any[]> {
-    if (tickets.length === 0) return [];
 
-    try {
-        const headers = {
-            Authorization: `Basic ${Buffer.from(`${JIRA_EMAIL}:${JIRA_TOKEN}`).toString('base64')}`,
-            'Content-Type': 'application/json',
-        };
+export async function getTicketDetailsFromJira(ticketKeys: string[]): Promise<any[]> {
+  if (ticketKeys.length === 0) return [];
 
-        const jiraEndpoint = `${JIRA_BASE_URL}/rest/api/latest/search?jql=key in (${tickets.join(',')})&expand=changelog`;
-        const response = await axios.get(jiraEndpoint, { headers });
+  try {
+    const headers = {
+      Authorization: `Basic ${Buffer.from(`${process.env.JIRA_EMAIL}:${process.env.JIRA_TOKEN}`).toString('base64')}`,
+      'Content-Type': 'application/json',
+    };
 
-        return response.data.issues.map((issue: any) => {
-            // const changelogEntries = issue.changelog.histories.map((history: any) => ({
-            //     created: history.created,
-            //     items: history.items.map((item: any) => ({
-            //         field: item.field,
-            //         from: item.fromString,
-            //         to: item.toString,
-            //     })),
-            // }));
+    // Construct the JQL query for multiple keys
+    const jql = `key in (${ticketKeys.map(key => `"${key}"`).join(", ")})`;
+    const jiraEndpoint = `${process.env.JIRA_BASE_URL}/rest/api/latest/search?jql=${encodeURIComponent(jql)}&expand=changelog`;
 
-            return {
-                key: issue?.key,
-                summary: issue?.fields?.summary,
-                status: {
-                    name: issue?.fields?.status?.name,
-                    issueStatus: issue?.fields?.status?.statusCategory?.name,
-                },
-                priority: issue?.fields?.priority?.name,
-                createdAt: issue?.fields?.created,
-                assignee: issue?.fields?.assignee?.displayName,
-                assigneeImage: issue?.fields?.assignee?.avatarUrls?.['48x48'],
-                reported: issue?.fields?.reporter?.displayName,
-                reportedImage: issue?.fields?.reporter?.avatarUrls?.['48x48'],
-                link: `${JIRA_BASE_URL}/browse/${issue.key}`,
-                // changelog: changelogEntries,
-            };
-        });
-    } catch (error: unknown) {
-        console.error('Error querying Jira:', error);
-        throw new Error('Failed to fetch ticket data from Jira');
-    }
+    const response = await axios.get(jiraEndpoint, { headers });
+
+    return response.data.issues.map((issue: any) => ({
+      key: issue.key,
+      summary: issue.fields.summary,
+      status: {
+        name: issue.fields.status.name,
+        issueStatus: issue.fields.status.statusCategory.name,
+      },
+      priority: issue.fields.priority?.name,
+      createdAt: issue.fields.created,
+      assignee: issue.fields.assignee?.displayName,
+      assigneeImage: issue.fields.assignee?.avatarUrls?.['48x48'],
+      reported: issue.fields.reporter?.displayName,
+      reportedImage: issue.fields.reporter?.avatarUrls?.['48x48'],
+      link: `${process.env.JIRA_BASE_URL}/browse/${issue.key}`
+    }));
+  } catch (error: any) {
+    console.error('Error querying Jira:', error.message);
+    throw new Error('Failed to fetch ticket data from Jira');
+  }
 }
 
 // ticket array list detail fetch from jira and then store this in db 
