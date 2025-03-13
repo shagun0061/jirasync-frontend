@@ -11,8 +11,7 @@ const EditableRow = ({ row, category, onRowUpdate }:TicketEditableRowProps) => {
   const [localRow, setLocalRow] = useState(row);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  console.log("🚀 ~ statusColor ~ localRow:", localRow)
+  //here
   const statusStyles = statusColor(localRow.status)
 
   const handleSave = async () => {
