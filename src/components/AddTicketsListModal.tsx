@@ -23,7 +23,7 @@ import { TicketListRefreshProps } from '@/helpers';
 
 
 
-export default function AddTicketsListModal({setRefresh} :TicketListRefreshProps) {
+export default function AddTicketsListModal({ setRefresh }: TicketListRefreshProps) {
     const [formValues, setFormValues] = React.useState({
         qaTicketList: "",
         newTicketList: "",
@@ -72,30 +72,39 @@ export default function AddTicketsListModal({setRefresh} :TicketListRefreshProps
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setResponseMessage("");
-        
+
         try {
             if (isFormValid) {
                 const ticketListPayload = await buildTicketPayload(formValues);
                 setLoading(true);
-    
+
                 // Call your POST API endpoint
                 const res = await fetch("/api/ticket", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(ticketListPayload),
                 });
-    
-                if (res.ok) {     
+
+                if (res.ok) {
                     setResponseMessage("Tickets stored successfully! 🎉");
                     setToastType("success");
                     setToastOpen(true);
                     setIsModalOpen(false);
+                    setFormValues({
+                        qaTicketList: "",
+                        newTicketList: "",
+                        holdTicketList: "",
+                        continueTicketList: "",
+                    })
+                    setRefresh((prev) => !prev)
+
                 } else {
                     setResponseMessage("Getting issue, tickets didn't store ❌");
                     setToastType("error");
                     setToastOpen(true);
+                    setRefresh(false)
                 }
-    
+
             } else {
                 setResponseMessage("Please fill all the fields ❌");
                 setToastType("error");
@@ -103,27 +112,21 @@ export default function AddTicketsListModal({setRefresh} :TicketListRefreshProps
             }
         } catch (err: unknown) {
             console.error("Error in handleSubmit:", err);
-    
+
             if (err instanceof Error) {
                 setResponseMessage(`Something Went Wrong ❌: ${err.message}`);
             } else {
                 setResponseMessage("Something Went Wrong ❌");
             }
-            
+
             setToastType("error");
             setToastOpen(true);
         } finally {
             setLoading(false);
-            setFormValues({
-                qaTicketList: "",
-                newTicketList: "",
-                holdTicketList: "",
-                continueTicketList: "",
-            })
-            setRefresh((prev) => !prev)
+
         }
     };
-    
+
 
     const handleClose = () => setIsModalOpen(false);
     const style = {
