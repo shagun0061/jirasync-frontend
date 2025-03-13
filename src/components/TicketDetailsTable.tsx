@@ -78,10 +78,21 @@ const TicketTable = ({ title, tickets, filter, loading }: TicketListingDetailPro
             ))
           ) : (
             <TableRow>
-              <TableCell sx={{ fontSize: '20px', padding: '20px' }} align="center">
-                No Tickets Found
-              </TableCell>
-            </TableRow>
+            <TableCell colSpan={7} align="center">
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: 200, 
+                  width: '100%',
+                }}
+              >
+                <span style={{ fontSize: '20px', fontWeight: 600 }}>No Tickets Found</span>
+              </Box>
+            </TableCell>
+          </TableRow>
+          
           )}
         </TableBody>
       </Table>

@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { TableRow, TableCell, Button, TextField, Box } from '@mui/material';
 import InsertLinkIcon from '@mui/icons-material/InsertLink';
 import { TicketEditableRowProps } from '@/helpers';
-import { statusColor } from '@/helpers/Common';
+import { getPriorityIcon, statusColor } from '@/helpers/Common';
 
 
-const EditableRow = ({ row, category, onRowUpdate }:TicketEditableRowProps) => {
+const EditableRow = ({ row, category, onRowUpdate }: TicketEditableRowProps) => {
   const [editing, setEditing] = useState(false);
-  const [newBoard, setNewBoard] = useState(row.ticketNo); 
+  const [newBoard, setNewBoard] = useState(row.ticketNo);
   const [localRow, setLocalRow] = useState(row);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,12 +29,12 @@ const EditableRow = ({ row, category, onRowUpdate }:TicketEditableRowProps) => {
       }
       // updatedTicketData is returned with fresh data.
       const updatedTicketData = data.updatedTicketData || data.updateResult?.updatedTicketData;
-      
+
       // Merge the updated data with the local row.
-      
+
       const newLocalRow = { ...localRow, ...updatedTicketData, ticketNo: updatedTicketData.key };
       setLocalRow(newLocalRow);
-  
+
       // Optionally, call the parent's onRowUpdate callback.
       if (onRowUpdate) onRowUpdate(newLocalRow);
       setEditing(false);
@@ -44,8 +44,8 @@ const EditableRow = ({ row, category, onRowUpdate }:TicketEditableRowProps) => {
       setLoading(false);
     }
   };
-  
-  
+
+
   return (
     <TableRow>
       <TableCell component="th" scope="row">
@@ -60,7 +60,7 @@ const EditableRow = ({ row, category, onRowUpdate }:TicketEditableRowProps) => {
         )}
       </TableCell>
       <TableCell align="center">
-      <Box
+        <Box
           sx={{
             borderRadius: '20px',
             padding: 1,
@@ -89,10 +89,15 @@ const EditableRow = ({ row, category, onRowUpdate }:TicketEditableRowProps) => {
             alt={localRow.reported ?? localRow?.reportedBy}
             style={{ width: 30, height: 30, borderRadius: '50%', marginRight: 8 }}
           />
-     {localRow.reported ?? localRow?.reportedBy}
+          {localRow.reported ?? localRow?.reportedBy}
         </Box>
       </TableCell>
-      <TableCell align="center">{localRow.priority}</TableCell>
+      <TableCell align="center">
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {getPriorityIcon(localRow.priority)}
+          <span style={{ marginLeft: 4, textTransform: 'capitalize' }}>{localRow.priority}</span>
+        </Box>
+      </TableCell>
       <TableCell align="center">
         <a href={localRow.Link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
           <InsertLinkIcon />

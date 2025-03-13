@@ -32,7 +32,6 @@ export async function getTicketDetailsFromJira(ticketKeys: string[]): Promise<Ti
 
     const response = await axios.get(jiraEndpoint, { headers });
 
-    console.log("🚀 ~ 111111111111111 getTicketDetailsFromJira ~ response:",  response.data.issues)
     return response.data.issues.map((issue: JiraIssue) => ({
       key: issue.key,
       summary: issue.fields.summary,

@@ -2,6 +2,12 @@
 import { styled } from '@mui/material/styles';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
+import LabelImportantIcon from '@mui/icons-material/LabelImportant';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import DensityMediumIcon from '@mui/icons-material/DensityMedium';
+
 import { RowData, Ticket } from '.';
 import React from 'react';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
@@ -40,6 +46,52 @@ export function statusColor(status: string): { backgroundColor: string; color: s
   return statusColors[status] || { backgroundColor: "#FFFFFF", color: "#000000" };
 } 
 
+export const getPriorityIcon = (priority: string) => {
+  switch (priority.toLowerCase()) {
+    case 'highest':
+      return (
+        <ErrorOutlineIcon
+          sx={{ color: '#d04437', fontSize: 18 }} // Dark Red (Jira style)
+          titleAccess="Highest Priority"
+        />
+      );
+    case 'high':
+      return (
+        <LabelImportantIcon
+          sx={{ color: '#f29220', fontSize: 18 }} // Orange
+          titleAccess="High Priority"
+        />
+      );
+    case 'medium':
+      return (
+        <DensityMediumIcon
+          sx={{ color: '#ffcc00', fontSize: 18 }} // Yellow
+          titleAccess="Medium Priority"
+        />
+      );
+    case 'low':
+      return (
+        <ArrowDownwardIcon
+          sx={{ color: '#14892c', fontSize: 18 }} // Green
+          titleAccess="Low Priority"
+        />
+      );
+    case 'lowest':
+      return (
+        <ArrowDownwardIcon
+          sx={{ color: '#2055b6', fontSize: 18 }} // Blue
+          titleAccess="Lowest Priority"
+        />
+      );
+    default:
+      return (
+        <PriorityHighIcon
+          sx={{ color: 'gray', fontSize: 18 }}
+          titleAccess="Normal Priority"
+        />
+      );
+  }
+};
 export const mapTicketsToRows = (tickets: Ticket[]): RowData[] => {
   const unassignedImage = 'https://secure.gravatar.com/avatar/?d=mm&s=32';
   return tickets?.map((ticket) => ({

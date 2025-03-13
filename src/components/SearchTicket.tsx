@@ -7,14 +7,12 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import InsertLinkIcon from '@mui/icons-material/InsertLink';
-import {  StyledTableCell, StyledTableRow } from '@/helpers/Common';
+import { StyledTableCell, StyledTableRow, getPriorityIcon, statusColor } from '@/helpers/Common';
 import { Box, Typography } from '@mui/material';
 import { SearchTicketProps, Ticket } from '@/helpers';
 
 const SearchTicket = ({ searchValue, combinedTickets }: SearchTicketProps) => {
-
   const filteredTickets = combinedTickets.filter((ticket: Ticket) => {
-    console.log("🚀 ~ filteredTickets ~ ticket:", ticket)
     const searchLower = searchValue.toLowerCase();
     return (
       ticket.key?.toLowerCase().includes(searchLower) ||
@@ -26,13 +24,14 @@ const SearchTicket = ({ searchValue, combinedTickets }: SearchTicketProps) => {
       ticket.link?.toLowerCase().includes(searchLower)
     );
   });
+
   return (
     <TableContainer component={Paper}>
       {filteredTickets.length > 0 ? (
         <Table aria-label="search result table">
           <TableHead>
             <TableRow>
-              <StyledTableCell>Category</StyledTableCell> 
+              <StyledTableCell>Category</StyledTableCell>
               <StyledTableCell>Ticket Number</StyledTableCell>
               <StyledTableCell>Status</StyledTableCell>
               <StyledTableCell>Assignee</StyledTableCell>
@@ -42,9 +41,12 @@ const SearchTicket = ({ searchValue, combinedTickets }: SearchTicketProps) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredTickets.map((row, index) => (
+            {filteredTickets?.map((row, index) => (
               <StyledTableRow key={index}>
-                <TableCell>{row.category}</TableCell>
+                <TableCell sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '16px' }}>
+                  {row.category}
+                </TableCell>
+
                 <TableCell>{row.key}</TableCell>
                 <TableCell>
                   <Box
@@ -54,7 +56,10 @@ const SearchTicket = ({ searchValue, combinedTickets }: SearchTicketProps) => {
                       py: 0.5,
                       display: "inline-block",
                       fontSize: "12px",
-                      
+                      backgroundColor: statusColor(row.status?.name).backgroundColor,
+                      color: statusColor(row?.status?.name).color,
+                      fontWeight: "bold",
+                      textAlign: "center",
                     }}
                   >
                     {row.status?.name}
@@ -62,7 +67,12 @@ const SearchTicket = ({ searchValue, combinedTickets }: SearchTicketProps) => {
                 </TableCell>
                 <TableCell>{row.assignee}</TableCell>
                 <TableCell>{row.reported || row.reportedBy}</TableCell>
-                <TableCell>{row.priority}</TableCell>
+                <TableCell align="center">
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {getPriorityIcon(row.priority)}
+                    <span style={{ marginLeft: 4, textTransform: 'capitalize' }}>{row.priority}</span>
+                  </Box>
+                </TableCell>
                 <TableCell>
                   <a href={row.link} target="_blank" rel="noopener noreferrer">
                     <InsertLinkIcon />
@@ -71,7 +81,6 @@ const SearchTicket = ({ searchValue, combinedTickets }: SearchTicketProps) => {
               </StyledTableRow>
             ))}
           </TableBody>
-
         </Table>
       ) : (
         <Typography variant="body1" align="center" sx={{ m: 2 }}>
