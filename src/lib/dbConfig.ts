@@ -1,10 +1,12 @@
 import mongoose from "mongoose";
 
-const localDB = 'mongodb://localhost:27017/jira-sync';
+// const localDB = 'mongodb://localhost:27017/jira-sync';
 
 // const cloudDB = 'mongodb+srv://jk975067:YRZDwoCGvh4uZG1n@jira-sync.7nbpu.mongodb.net/Jira-db?retryWrites=true&w=majority&appName=Jira-Sync';
 
-const url = localDB;
+const localDB = process.env.LOCAL_DB || 'mongodb://localhost:27017/jira-sync';
+const url: string = localDB;
+
 
 export async function connect() {
   try {
