@@ -3,6 +3,8 @@ import { styled } from '@mui/material/styles';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import { RowData, Ticket } from '.';
+import React from 'react';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 export const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:nth-of-type(odd)': {
@@ -103,3 +105,11 @@ export function extractTicketNumbers(input: string): string[] {
       throw error;
     }
   };
+
+  // Custom Alert Component
+export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});

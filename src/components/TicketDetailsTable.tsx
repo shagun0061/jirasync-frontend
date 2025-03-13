@@ -13,7 +13,7 @@ import { mapTicketsToRows, StyledTableCell } from '@/helpers/Common';
 import { TicketListingDetailProp } from '@/helpers';
 
 const TicketTable = ({ title, tickets, filter, loading }: TicketListingDetailProp) => {
-  const rows = mapTicketsToRows(tickets);
+  const rows = mapTicketsToRows(tickets || []);
 
   return (
     <TableContainer component={Paper} sx={{ mt: filter === 'All' ? 5 : undefined }}>

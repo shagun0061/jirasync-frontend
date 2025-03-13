@@ -20,9 +20,9 @@ export interface Ticket {
 }
 
   export interface TicketEditableRowProps {
-    row: any; 
+    row: RowData; 
     category: string;
-    onRowUpdate?: (updatedRow: any) => void;
+    onRowUpdate?: (updatedRow: Ticket[]) => void;
   }
   
   
@@ -59,7 +59,9 @@ export interface Ticket {
     assignee: string;
     assigneeImage?: string; 
     reportedBy: string;
+    reported?: string
     reportedByImage?: string; 
+    reportedImage?: string
     priority: string;
     Link: string;
   }

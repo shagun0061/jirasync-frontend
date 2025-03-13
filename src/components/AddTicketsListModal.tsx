@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Modal from '@mui/material/Modal';
 import Snackbar from '@mui/material/Snackbar';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
+
 import LinearProgress from '@mui/material/LinearProgress';
 import {
     Box,
@@ -11,6 +11,7 @@ import {
     Container,
     Grid,
     CircularProgress,
+    Alert,
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import { useState, useEffect } from 'react';
@@ -21,13 +22,6 @@ import { TicketListRefreshProps } from '@/helpers';
 
 
 
-// Custom Alert Component
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-    props,
-    ref
-) {
-    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
 
 export default function AddTicketsListModal({setRefresh} :TicketListRefreshProps) {
     const [formValues, setFormValues] = React.useState({
@@ -120,6 +114,12 @@ export default function AddTicketsListModal({setRefresh} :TicketListRefreshProps
             setToastOpen(true);
         } finally {
             setLoading(false);
+            setFormValues({
+                qaTicketList: "",
+                newTicketList: "",
+                holdTicketList: "",
+                continueTicketList: "",
+            })
             setRefresh((prev) => !prev)
         }
     };

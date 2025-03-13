@@ -14,10 +14,6 @@ import CachedIcon from "@mui/icons-material/Cached";
 import { MyContext } from "@/context/MyProvider";
 import { TicketListRefreshProps } from "@/helpers";
 
-type Props = {
-    setRefresh: (value: boolean) => void;
-};
-
 export default function Navbar({ setRefresh }: TicketListRefreshProps) {
     const { setIsModalOpen } = useContext(MyContext);
 

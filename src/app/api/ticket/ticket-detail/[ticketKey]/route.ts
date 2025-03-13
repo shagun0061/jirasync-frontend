@@ -45,7 +45,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { ticketKey:
       reported: freshData.reported,
       reportedImage: freshData.reportedImage,
       ticketLink: freshData.link,
-      createdAt: freshData.createdAt || freshData.created,
+      createdAt: freshData.createdAt,
     };
 
     // Update the specific ticket in the JiraTicketsDetail document.   
@@ -60,10 +60,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { ticketKey:
       { message: "Ticket updated successfully", updateResult,updatedTicketData: updatedTicketData },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in PATCH /api/ticket-detail/[ticketKey]:", error);
     return NextResponse.json(
-      { message: "Error updating ticket", error: error.message },
+      { message: "Getting error in updating the ticket", },
       { status: 500 }
     );
   }
