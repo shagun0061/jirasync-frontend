@@ -35,7 +35,6 @@ const theme = createTheme({
 export default function Home() {
   const [searchValue, setSearchValue] = useState<string>("");
   const [filter, setFilter] = useState<string>("All");
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [refresh, setRefresh] = useState<boolean>(false);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
@@ -81,7 +80,6 @@ export default function Home() {
       try {
         if (filter || refresh) {
           setLoading(true);
-          setError(null);
           const data = await fetchTicketDetailByCategory(filter);
 
           setTickets({
@@ -91,8 +89,8 @@ export default function Home() {
             hold: filter === "All" || filter === "Hold" ? data?.tickets?.holdTickets || [] : [],
           });
         }
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+      console.error(`getting error in fetching the ticket list ${err}`)
       } finally {
         setLoading(false);
       }

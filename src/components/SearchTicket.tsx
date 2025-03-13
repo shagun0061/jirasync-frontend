@@ -7,7 +7,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import InsertLinkIcon from '@mui/icons-material/InsertLink';
-import { statusColor, StyledTableCell, StyledTableRow } from '@/helpers/Common';
+import {  StyledTableCell, StyledTableRow } from '@/helpers/Common';
 import { Box, Typography } from '@mui/material';
 import { SearchTicketProps, Ticket } from '@/helpers';
 
@@ -26,7 +26,6 @@ const SearchTicket = ({ searchValue, combinedTickets }: SearchTicketProps) => {
       ticket.link?.toLowerCase().includes(searchLower)
     );
   });
-
   return (
     <TableContainer component={Paper}>
       {filteredTickets.length > 0 ? (
@@ -55,6 +54,7 @@ const SearchTicket = ({ searchValue, combinedTickets }: SearchTicketProps) => {
                       py: 0.5,
                       display: "inline-block",
                       fontSize: "12px",
+                      
                     }}
                   >
                     {row.status?.name}

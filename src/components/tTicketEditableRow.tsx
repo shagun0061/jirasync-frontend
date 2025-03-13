@@ -39,8 +39,8 @@ const EditableRow = ({ row, category, onRowUpdate }:TicketEditableRowProps) => {
       // Optionally, call the parent's onRowUpdate callback.
       if (onRowUpdate) onRowUpdate(newLocalRow);
       setEditing(false);
-    } catch (err: any) {
-      setError(err.message || 'Error updating ticket');
+    } catch (err) {
+      setError(`Oops, Getting Error In Updating The Ticket ${err}`);
     } finally {
       setLoading(false);
     }

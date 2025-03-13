@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { connect } from "@/lib/dbConfig";
 import axios from "axios";
 import { JiraTicketsDetail } from "@/lib/model/jiraTicketDetailSchema";
 import { ProcessedTickets } from "@/app/api/ticket/route";
+import { JiraIssue, TicketDetail } from "@/app/api/helpers";
 // import JiraTicketsDetail
 
 const JIRA_BASE_URL = process.env.JIRA_BASE_URL;
@@ -14,7 +17,7 @@ if (!JIRA_BASE_URL || !JIRA_EMAIL || !JIRA_TOKEN) {
 
 //fetch ticket full detail from jira 
 
-export async function getTicketDetailsFromJira(ticketKeys: string[]): Promise<any[]> {
+export async function getTicketDetailsFromJira(ticketKeys: string[]): Promise<TicketDetail[]> {
   if (ticketKeys.length === 0) return [];
 
   try {
@@ -29,7 +32,8 @@ export async function getTicketDetailsFromJira(ticketKeys: string[]): Promise<an
 
     const response = await axios.get(jiraEndpoint, { headers });
 
-    return response.data.issues.map((issue: any) => ({
+    console.log("🚀 ~ 111111111111111 getTicketDetailsFromJira ~ response:",  response.data.issues)
+    return response.data.issues.map((issue: JiraIssue) => ({
       key: issue.key,
       summary: issue.fields.summary,
       status: {
@@ -44,39 +48,36 @@ export async function getTicketDetailsFromJira(ticketKeys: string[]): Promise<an
       reportedImage: issue.fields.reporter?.avatarUrls?.['48x48'],
       link: `${process.env.JIRA_BASE_URL}/browse/${issue.key}`
     }));
-  } catch (error: any) {
-    console.error('Error querying Jira:', error.message);
+  } catch (error) {
+    console.error('Error querying Jira:', error);
     throw new Error('Failed to fetch ticket data from Jira');
   }
 }
 
 // ticket array list detail fetch from jira and then store this in db 
 export async function fetchAndStoreJiraDetails(modifiedTicketList: ProcessedTickets) {
-    try {
-        if (!modifiedTicketList) return;
-        const categorizedTickets: Record<string, any[]> = {}; // Object to store category-wise tickets
+  try {
+      if (!modifiedTicketList) return;
+      const categorizedTickets: Record<string, any[]> = {}; // Object to store category-wise tickets
 
-        // MongoDB Connect
-        await connect();
+      // MongoDB Connect
+      await connect();
 
-        const categories = Object.keys(modifiedTicketList) as (keyof ProcessedTickets)[];
+      // Safe way to iterate over ticket lists
+      for (const [item, ticketNumbers] of Object.entries(modifiedTicketList) as [keyof ProcessedTickets, string[]][]) {
+          console.log("🚀 ~ fetchAndStoreJiraDetails ~ ticketNumbers:", ticketNumbers);
+          const ticketDetails = await getTicketDetailsFromJira(ticketNumbers);
+          categorizedTickets[item] = ticketDetails;
+      }
 
-        // ✅ Iterate over categories & fetch Jira details
-        for (const item of categories) {
-            const ticketNumbers = modifiedTicketList[item] || [];  // ✅ No more error
-            const ticketDetails = await getTicketDetailsFromJira(ticketNumbers);
-            categorizedTickets[item] = ticketDetails;
-        }
+      if (Object.keys(categorizedTickets).length > 0) {
+          await saveTicketsToDB(categorizedTickets, modifiedTicketList);
+          return categorizedTickets;
+      }
 
-        if (categorizedTickets) {
-            await saveTicketsToDB(categorizedTickets, modifiedTicketList);
-            return categorizedTickets
-        }
-
-
-    } catch (error) {
-        console.error("🚀 ~ getting Error for fetching ticket detail from jira and stroing data in DB:", error);
-    }
+  } catch (error) {
+      console.error("🚀 ~ Error fetching/storing Jira ticket details:", error);
+  }
 }
 
 // Save Tickets to MongoDB
@@ -94,6 +95,7 @@ export async function saveTicketsToDB(
         //     updatedAt: new Date(),
         //     deletedAt: null
         // };
+console.log('22222222222---categorizedTickets---',categorizedTickets);
 
 
         const JiraDetail = new JiraTicketsDetail({

@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import { connect } from '@/lib/dbConfig';
 import { Ticket } from '@/lib/model/ticketSchema';
-import { getValidBoardsFromJira } from '../jira/route';
 import { fetchAndStoreJiraDetails } from '@/services/jiraService';
 import { JiraTicketsDetail } from '@/lib/model/jiraTicketDetailSchema';
+import { getValidBoardsFromJira } from '../utils/jira';
 
 
 const JIRA_BASE_URL = process.env.JIRA_BASE_URL;
@@ -81,7 +83,8 @@ async function createTicketCombination(ticketList: TicketList): Promise<{ finalT
       for (const category in ticketList) {
 
         // Compare as strings (remove parseInt) so "2150" matches "2150"
-        if (ticketList[category as keyof TicketList].includes(ticket)) {
+        if (ticketList[category as keyof TicketList].map(String).includes(ticket)) {
+
 
           // Add the resolved board to the corresponding category in finalTicketList
           finalTicketList[category as keyof ProcessedTickets].push(finalBoard);
